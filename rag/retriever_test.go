@@ -5,33 +5,46 @@ import (
 	"rag-agent/config"
 	"testing"
 
-	"github.com/cloudwego/eino-ext/components/embedding/ark"
-	"github.com/go-redis/redismock/v9"
+	"github.com/redis/go-redis/v9"
 )
 
 func init() {
 	// 加载配置
-	config.LoadConfig("config.yaml")
+	config.LoadConfig(config.DefaultConfigPath)
 }
 
 // TestNewRedisRetriever_WithMock 测试NewRedisRetriever函数，使用mock进行更完整的测试
-func TestNewRedisRetriever_WithMock(t *testing.T) {
+func TestRedisRetriever(t *testing.T) {
 	ctx := context.Background()
-	indexName := "test_index"
+	cfg := config.GetConfig()
+	indexName := cfg.RAG.IndexName
 
 	// 创建Redis客户端和mock
-	rdb, _ := redismock.NewClientMock()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+		UnstableResp3: true,
+	})
 
-	// 这里我们不模拟具体的Redis命令，因为NewRedisRetriever主要是配置Retriever
-	// 实际的检索操作会在其他地方测试
-
-	// 创建mock的embedder
-	embedder := &ark.Embedder{}
+	embedder, err := NewArkEmbedder(ctx)
+	if err != nil {
+		t.Fatalf("ArkEmbedder creation failed: %v", err)
+	}
 
 	// 测试创建Redis检索器
-	_, err := NewRedisRetriever(ctx, rdb, embedder, indexName)
+	retriever, err := NewRedisRetriever(ctx, rdb, embedder, indexName)
 
 	if err != nil {
-		t.Logf("Expected retriever creation might fail with redismock: %v", err)
+		t.Fatalf("Expected retriever creation might fail with redismock: %v", err)
+	}
+
+	docs, err := retriever.Retrieve(ctx, "kafka如何保证消息不丢失")
+	if err != nil {
+		t.Fatalf("Expected retriever retrieval might fail with redismock: %v", err)
+	}
+
+	if len(docs) > 0 {
+		t.Logf("Expected retriever retrieval might return documents: %v", docs)
 	}
 }

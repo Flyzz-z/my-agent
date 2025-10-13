@@ -23,10 +23,8 @@ func TestEmbedder(t *testing.T) {
 	// 创建embedder
 	embedder, err := NewArkEmbedder(ctx)
 	
-	// 由于实际环境中可能无法连接到Ark API，这里只测试错误处理逻辑
-	// 在实际可连接的环境中，应该测试embedder是否成功创建
 	if err != nil {
-		t.Fatalf("Expected embedder creation might fail in test environment: %v", err)
+		t.Fatalf("Embedder creation failed: %v", err)
 	} else {
 		// 如果成功创建，验证embedder不为nil
 		assert.NotNil(t, embedder, "Embedder should not be nil")
@@ -35,6 +33,6 @@ func TestEmbedder(t *testing.T) {
 	// 测试EmbedStrings方法
 	_, err = embedder.EmbedStrings(ctx, []string{"测试文本"})
 	if err != nil {
-		t.Fatalf("Expected embedding might fail in test environment: %v", err)
+		t.Fatalf("EmbedStrings failed: %v", err)
 	}
 }

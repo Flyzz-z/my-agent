@@ -22,7 +22,7 @@ func NewRedisRetriever(ctx context.Context, client *redis.Client, embedder *ark.
 		Dialect:           2,
 		ReturnFields:      []string{"vector_content", "content"},
 		DocumentConverter: nil,
-		TopK:              1,
+		TopK:              3,
 	})
 	if err != nil {
 		log.Printf("NewRedisRetriever failed, err: %v\n", err)

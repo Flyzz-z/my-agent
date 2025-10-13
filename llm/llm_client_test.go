@@ -37,7 +37,7 @@ func TestLLMClient(t *testing.T) {
 	assert.NoError(t, err, "Should not return error when formatting messages")
 
 	// 测试Generate方法
-	resp, err := llmClient.chatModel.Generate(ctx, messages)
+	resp, err := llmClient.ChatModel.Generate(ctx, messages)
 	assert.NoError(t, err, "Should not return error when generating response")
 	assert.NotEmpty(t, resp, "Response should not be empty")
 	if resp != nil {
