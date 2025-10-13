@@ -8,8 +8,8 @@ redis:
 
 # 大语言模型配置
 llm:
-  base_url: "http://localhost:11434"
-  model: "qwen:4b"
+  base_url: "http://192.168.124.1:11434"
+  model: "qwen3:4b"
   timeout: 60s
 
 # RAG 配置
@@ -26,4 +26,4 @@ rag:
 
 embedding:
   model: "doubao-embedding-text-240715"
-  api_key: "abf73e96-ee43-4369-95b4-5c29e67553f4"
+  api_key: "api key"
