@@ -27,20 +27,6 @@ type Agent struct {
 	llm        *llm.LLMClient
 }
 
-// Ask 使用Agent回答问题
-// func (a *Agent) Ask(ctx context.Context, question string) (string, error) {
-// 	// 1. 使用RAG检索相关文档
-// 	relevantDocs, err := a.ragManager.Retrieve(ctx, question, 3)
-// 	if err != nil {
-// 		return "", fmt.Errorf("检索相关文档失败: %v", err)
-// 	}
-
-// 	// 2. 构建提示词
-// 	prompt := a.buildPrompt(question, relevantDocs)
-
-// 	// 3. 调用大语言模型生成回答
-// 	return a.llm.Generate(ctx, prompt)
-// }
 
 // buildPrompt 构建提示词
 func (a *Agent) buildPrompt(question string, docs []string) string {

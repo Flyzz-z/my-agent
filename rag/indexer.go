@@ -32,18 +32,17 @@ func InitVectorIndex(ctx context.Context, client *redis.Client, indexName, prefi
 	indexArgs := []interface{}{
 		"FT.CREATE", indexName,
 		"ON", "HASH",
-		"TYPE", "FLOAT32",
-		"DIM", dimension,
-		"DISTANCE_METRIC", "COSINE",
 		"PREFIX", "1", prefix,
 		"SCHEMA",
 		"vector_content", "VECTOR", "FLAT", "6",
 		"TYPE", "FLOAT32",
-		"VEC_TYPE", "FLOAT32",
 		"DIM", dimension,
+		"DISTANCE_METRIC", "COSINE",
 		"content", "TEXT",
 	}
+	
 	if _, err := client.Do(ctx, indexArgs...).Result(); err != nil {
+		log.Printf("InitVectorIndex err: %v", err)
 		return err
 	}
 	return nil

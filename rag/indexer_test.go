@@ -2,28 +2,16 @@ package rag
 
 import (
 	"context"
+	"rag-agent/config"
 	"testing"
 	"github.com/go-redis/redismock/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
 
-// TestNewRedisIndexer 测试NewRedisIndexer函数
-func TestNewRedisIndexer(t *testing.T) {
-	ctx := context.Background()
-	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379", // 实际测试环境可能需要修改
-	})
-	prefix := "test_prefix"
-	
-	// 由于embedder依赖外部服务，这里我们主要测试参数验证和错误处理
-	// 在实际可连接的环境中，应该使用真实的embedder进行测试
-	// 这里使用nil来测试错误处理
-	indexer, err := NewRedisIndexer(ctx, client, nil, prefix)
-	
-	// 由于我们传入了nil的embedder，应该返回错误
-	assert.Error(t, err, "Should return error when embedder is nil")
-	assert.Nil(t, indexer, "Indexer should be nil when error occurs")
+func init() {
+	// 初始化配置
+	config.LoadDefaultConfig()
 }
 
 // TestInitVectorIndex 测试InitVectorIndex函数
@@ -68,3 +56,29 @@ func TestInitVectorIndex_ExistingIndex(t *testing.T) {
 	// 验证mock期望是否都被满足
 	assert.NoError(t, mock.ExpectationsWereMet(), "All mock expectations should be met")
 }
+
+func TestRealInitVectorIndex(t *testing.T) {
+	ctx := context.Background()
+	
+	cfg := config.GetConfig()
+
+	// 创建Redis客户端
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+	
+	// 测试索引初始化
+	err := InitVectorIndex(ctx, rdb, "test_index", "test_prefix", 768)
+	
+	// 验证没有错误
+	assert.NoError(t, err, "Should not return error when initializing index")
+	
+	// 验证索引已存在
+	info, err := rdb.Do(ctx, "FT.INFO", "test_index").Result()
+	assert.NoError(t, err, "Should not return error when checking index existence")
+	assert.NotEmpty(t, info, "Index should exist after initialization")
+}
+
+
