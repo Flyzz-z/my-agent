@@ -1,0 +1,6 @@
+{
+	"go.alternateTools": {
+		"go": "/home/flyzz/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.8.linux-amd64/bin/go"
+	},
+	"go.goroot": "/home/flyzz/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.8.linux-amd64"
+}

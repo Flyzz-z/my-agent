@@ -1,0 +1,29 @@
+# Agent 应用配置文件
+
+# Redis 配置
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+# 大语言模型配置
+llm:
+  base_url: "http://localhost:11434"
+  model: "qwen:4b"
+  timeout: 60s
+
+# RAG 配置
+rag:
+  index_name: "rag_index"
+  prefix: "rag"
+  dimension: 1536
+  vector_field: "vector_content"
+  top_k: 3
+  dialect: 2
+  return_fields:
+    - "vector_content"
+    - "content"
+
+embedding:
+  model: "doubao-embedding-text-240715"
+  api_key: "abf73e96-ee43-4369-95b4-5c29e67553f4"
