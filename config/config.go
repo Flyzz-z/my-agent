@@ -21,6 +21,8 @@ type RedisConfig struct {
 	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
+	Protocol int    `yaml:"protocol"`
+	UnstableResp3 bool `yaml:"unstable_resp3"`
 }
 
 // LLMConfig 大语言模型相关配置
@@ -71,31 +73,6 @@ func LoadConfig(configPath string) error {
 	}
 
 	return nil
-}
-
-// LoadDefaultConfig 初始化全局配置为默认配置
-func LoadDefaultConfig() {
-	GlobalConfig = Config{
-		Redis: RedisConfig{
-			Addr:     "localhost:6379",
-			Password: "",
-			DB:       0,
-		},
-		LLM: LLMConfig{
-			BaseURL: "http://localhost:11434",
-			Model:   "qwen:4b",
-			Timeout: 60 * time.Second,
-		},
-		RAG: RAGConfig{
-			IndexName:    "rag_index:",
-			Prefix:       "rag_prefix:",
-			Dimension:    1536, // 常见嵌入模型的维度
-			VectorField:  "vector_content",
-			TopK:         1,
-			Dialect:      2,
-			ReturnFields: []string{"vector_content", "content"},
-		},
-	}
 }
 
 func GetConfig() *Config {

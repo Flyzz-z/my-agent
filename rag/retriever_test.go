@@ -13,7 +13,7 @@ func init() {
 	config.LoadConfig(config.DefaultConfigPath)
 }
 
-// TestNewRedisRetriever_WithMock 测试NewRedisRetriever函数，使用mock进行更完整的测试
+
 func TestRedisRetriever(t *testing.T) {
 	ctx := context.Background()
 	cfg := config.GetConfig()
@@ -24,7 +24,8 @@ func TestRedisRetriever(t *testing.T) {
 		Addr:     cfg.Redis.Addr,
 		Password: cfg.Redis.Password,
 		DB:       cfg.Redis.DB,
-		UnstableResp3: true,
+		Protocol: cfg.Redis.Protocol,
+		UnstableResp3: cfg.Redis.UnstableResp3,
 	})
 
 	embedder, err := NewArkEmbedder(ctx)
@@ -36,12 +37,12 @@ func TestRedisRetriever(t *testing.T) {
 	retriever, err := NewRedisRetriever(ctx, rdb, embedder, indexName)
 
 	if err != nil {
-		t.Fatalf("Expected retriever creation might fail with redismock: %v", err)
+		t.Fatalf("Expected retriever creation might fail : %v", err)
 	}
 
-	docs, err := retriever.Retrieve(ctx, "kafka如何保证消息不丢失")
+	docs, err := retriever.Retrieve(ctx, "kafka的消息丢失问题")
 	if err != nil {
-		t.Fatalf("Expected retriever retrieval might fail with redismock: %v", err)
+		t.Fatalf("Expected retriever retrieval might fail : %v", err)
 	}
 
 	if len(docs) > 0 {

@@ -5,6 +5,8 @@ redis:
   addr: "localhost:6379"
   password: ""
   db: 0
+  protocol: 2
+  unstable_resp3: true
 
 # 大语言模型配置
 llm:
@@ -15,8 +17,8 @@ llm:
 # RAG 配置
 rag:
   index_name: "rag_index"
-  prefix: "rag"
-  dimension: 1536
+  prefix: "rag_prefix:"
+  dimension: 2560
   vector_field: "vector_content"
   top_k: 3
   dialect: 2
@@ -26,4 +28,4 @@ rag:
 
 embedding:
   model: "doubao-embedding-text-240715"
-  api_key: "api key"
+  api_key: "api-key"

@@ -19,7 +19,7 @@ import (
 
 var systemPrompt = `
 # 角色: 你是一个专业的问答助手
-# 任务: 根据用户的问题和提供的文档内容，生成一个准确的回答
+# 任务: 根据用户的问题,有需要时使用提供的文档内容，生成一个准确的回答
 - 提供帮助时：
   • 表达清晰简洁
   • 相关时提供实际示例
@@ -57,7 +57,8 @@ func NewRAGEngine(ctx context.Context, indexName, prefix string) (*RAGEngine, er
 		Addr:          cfg.Redis.Addr,
 		Password:      cfg.Redis.Password,
 		DB:            cfg.Redis.DB,
-		UnstableResp3: true,
+		Protocol:      cfg.Redis.Protocol,
+		UnstableResp3: cfg.Redis.UnstableResp3,
 	})
 	// 初始化fileLoader
 	fileLoader, err := file.NewFileLoader(ctx, &file.FileLoaderConfig{

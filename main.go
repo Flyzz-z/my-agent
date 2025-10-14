@@ -17,8 +17,7 @@ func main() {
 	// 加载配置
 	err := config.LoadConfig(config.DefaultConfigPath)
 	if err != nil {
-		log.Printf("加载配置文件失败，使用默认配置: %v", err)
-		config.LoadDefaultConfig()
+		log.Fatalf("加载配置文件失败: %v", err)
 	}
 	cfg := config.GetConfig()
 
@@ -54,6 +53,6 @@ func main() {
 			break
 		}
 
-		fmt.Print(msg.ReasoningContent)
+		fmt.Print(msg.Content)
 	}
 }
