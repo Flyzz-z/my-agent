@@ -31,8 +31,9 @@ func TestEmbedder(t *testing.T) {
 	}
 
 	// 测试EmbedStrings方法
-	_, err = embedder.EmbedStrings(ctx, []string{"测试文本"})
+	embeddings, err := embedder.EmbedStrings(ctx, []string{"测试文本"})
 	if err != nil {
 		t.Fatalf("EmbedStrings failed: %v", err)
 	}
+	t.Logf("Embeddings: %v", len(embeddings[0]))
 }

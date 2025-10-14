@@ -7,7 +7,6 @@ toolchain go1.24.8
 require (
 	github.com/cloudwego/eino v0.5.5
 	github.com/cloudwego/eino-ext/components/model/ollama v0.1.3
-	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/redis/go-redis/v9 v9.10.0
 	github.com/stretchr/testify v1.10.0
 )
@@ -39,7 +38,7 @@ require (
 	github.com/cloudwego/eino-ext/components/retriever/redis v0.0.0-20251011073417-75b93b87b8a9
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eino-contrib/jsonschema v1.0.1 // indirect
-	github.com/eino-contrib/ollama v0.1.0 // indirect
+	github.com/eino-contrib/ollama v0.1.0
 	github.com/getkin/kin-openapi v0.118.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.5 // indirect

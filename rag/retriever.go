@@ -20,9 +20,9 @@ func NewRedisRetriever(ctx context.Context, client *redis.Client, embedder *ark.
 		VectorField:       "vector_content",
 		DistanceThreshold: nil,
 		Dialect:           2,
-		ReturnFields:      []string{"vector_content", "content"},
+		ReturnFields:      []string{"content", "vector_content"},
 		DocumentConverter: nil,
-		TopK:              3,
+		TopK:              1,
 	})
 	if err != nil {
 		log.Printf("NewRedisRetriever failed, err: %v\n", err)

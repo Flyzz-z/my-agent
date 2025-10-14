@@ -12,6 +12,7 @@ func NewRedisIndexer(ctx context.Context, client *redis.Client, embedder *ark.Em
 	indexer, err := redisInd.NewIndexer(ctx, &redisInd.IndexerConfig{
 		Client:    client,
 		Embedding: embedder,
+		DocumentToHashes: nil,
 		KeyPrefix: prefix,
 	})
 	if err != nil {

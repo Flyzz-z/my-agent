@@ -39,10 +39,13 @@ func NewLLMClient(ctx context.Context) (*LLMClient, error) {
 			Temperature:   0.7,        // 温度
 			TopP:          0.9,        // Top-P 采样
 			TopK:          40,         // Top-K 采样
-			// NumPredict:    200,        // 最大生成长度
+			NumPredict:    8192,        // 最大生成长度
 			Stop:          []string{}, // 停止词
-			RepeatPenalty: 1.1,        // 重复惩罚
-		
+			RepeatPenalty: 1.2,        // 重复惩罚
+			
+		},
+		Thinking: &api.ThinkValue{
+			Value: false,
 		},
 	})
 
