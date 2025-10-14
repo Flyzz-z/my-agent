@@ -7,12 +7,30 @@ import (
 	"io"
 	"log"
 	"rag-agent/config"
+	"rag-agent/llm"
 	"rag-agent/rag"
+
+	"github.com/cloudwego/eino/components/prompt"
+	"github.com/cloudwego/eino/compose"
+	"github.com/cloudwego/eino/schema"
 )
 
+var systemPrompt = `
+# 角色: 你是一个专业的问答助手
+# 任务: 根据用户的问题,有需要时使用提供的文档内容，生成一个准确的回答
+- 提供帮助时：
+  • 表达清晰简洁
+  • 相关时提供实际示例
+  • 有帮助时引用文档
+  • 适用时提出改进建议或下一步操作
+
+这里是文档内容：
+---- 文档开始 -----
+	{documents}
+---- 文档结束 ----
+`
+
 func main() {
-	// 创建上下文
-	// ctx := context.Background()
 
 	// 加载配置
 	err := config.LoadConfig(config.DefaultConfigPath)
@@ -34,25 +52,66 @@ func main() {
 		log.Fatalf("添加文件到索引失败: %v", err)
 	}
 
-	stream, err := ragEngine.QueryStream(ctx, "Kafka消息队列如何保证消息不丢失")
+	// 构建graph
+	graph := compose.NewGraph[string,*schema.Message]()
+
+	// 添加Retriever节点
+	graph.AddRetrieverNode("retriever", ragEngine.Retriever)
+
+	graph.AddLambdaNode("format_docs", compose.InvokableLambda(func(ctx context.Context, docs []*schema.Document) (map[string]any, error) {
+		return map[string]any{
+			"documents": docs,
+			"content":   ctx.Value("query").(string),
+		}, nil
+	}))
+
+	// 添加ChatTemplate节点
+	graph.AddChatTemplateNode("chat_template", prompt.FromMessages(schema.FString,
+		schema.SystemMessage(
+			systemPrompt,
+		),
+		schema.UserMessage(
+			"{content}",
+		),
+	))
+
+	llmClient, err := llm.NewLLMClient(ctx)
 	if err != nil {
-		log.Fatalf("查询失败: %v", err)
+		log.Fatalf("初始化LLM客户端失败: %v", err)
 	}
-	defer stream.Close()
+	// 添加ChatModel节点
+	graph.AddChatModelNode("chat_model", llmClient.ChatModel)
 
-	// 处理流式响应
+
+	//todo 添加工具节点，当前不知道添加什么
+
+	graph.AddEdge(compose.START, "retriever")
+	graph.AddEdge("retriever", "format_docs")
+	graph.AddEdge("format_docs", "chat_template")
+	graph.AddEdge("chat_template", "chat_model")
+	graph.AddEdge("chat_model", compose.END)
+
+	runner, err := graph.Compile(ctx)
+	if err != nil {
+		log.Fatalf("编译graph失败: %v", err)
+	}
+
+	// 运行graph
+	ctx = context.WithValue(ctx, "query", "Kafka如何阻止重复消费")
+	s, err := runner.Stream(ctx,
+		ctx.Value("query").(string),
+	)
+	if err != nil {
+		log.Fatalf("运行graph失败: %v", err)
+	}
 	for {
-		msg, err := stream.Recv()
-
+		msg, err := s.Recv()
 		if errors.Is(err, io.EOF) {
 			break
 		}
-
 		if err != nil {
-			log.Printf("接收流式响应失败: %v", err)
-			break
+			log.Fatalf("接收消息失败: %v", err)
 		}
-
-		fmt.Print(msg.Content)
+		fmt.Printf("%s", msg.Content)
 	}
 }

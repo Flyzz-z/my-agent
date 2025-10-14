@@ -12,8 +12,6 @@ import (
 	redisInd "github.com/cloudwego/eino-ext/components/indexer/redis"
 	redisRet "github.com/cloudwego/eino-ext/components/retriever/redis"
 	"github.com/cloudwego/eino/components/document"
-	"github.com/cloudwego/eino/components/prompt"
-	"github.com/cloudwego/eino/schema"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -149,40 +147,4 @@ func (e *RAGEngine) AddFile(ctx context.Context, filePath string) error {
 		return err
 	}
 	return nil
-}
-
-func (e *RAGEngine) QueryStream(ctx context.Context, query string) (*schema.StreamReader[*schema.Message], error) {
-	// 检索文档
-	docs, err := e.Retriever.Retrieve(ctx, query)
-	if err != nil {
-		log.Printf("retrieve failed: %v", err)
-		return nil, err
-	}
-
-	// prompt template
-	template := prompt.FromMessages(schema.FString,
-		schema.SystemMessage(
-			systemPrompt,
-		),
-		schema.UserMessage(
-			"{content}",
-		),
-	)
-
-	messages, err := template.Format(ctx, map[string]any{
-		"documents": docs,
-		"content":   query,
-	})
-	if err != nil {
-		log.Printf("format prompt failed: %v", err)
-		return nil, err
-	}
-
-	// 生成回答
-	stream, err := e.LLM.ChatModel.Stream(ctx, messages)
-	if err != nil {
-		log.Printf("generate failed: %v", err)
-		return nil, err
-	}
-	return stream, nil
 }
