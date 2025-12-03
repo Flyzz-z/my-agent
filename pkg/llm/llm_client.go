@@ -57,3 +57,8 @@ func NewLLMClient(ctx context.Context) (*LLMClient, error) {
 		ChatModel: chatModel,
 	}, nil
 }
+
+// GetModel 获取聊天模型 - 实现aisearch.ChatModel接口
+func (c *LLMClient) GetModel() interface{} {
+	return c.ChatModel
+}

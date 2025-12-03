@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"rag-agent/config"
-	"rag-agent/llm"
+	"rag-agent/pkg/llm"
 
 	"github.com/cloudwego/eino-ext/components/document/loader/file"
 	redisInd "github.com/cloudwego/eino-ext/components/indexer/redis"
@@ -132,4 +132,9 @@ func (e *RAGEngine) AddFile(ctx context.Context, filePath string) error {
 		return err
 	}
 	return nil
+}
+
+// GetRetriever 获取检索器 - 实现aisearch.RAGEngine接口
+func (e *RAGEngine) GetRetriever() interface{} {
+	return e.Retriever
 }

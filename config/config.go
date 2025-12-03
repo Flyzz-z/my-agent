@@ -10,10 +10,15 @@ import (
 
 // Config 结构体定义整个应用程序的配置
 type Config struct {
-	Redis  RedisConfig  `yaml:"redis"`
-	LLM    LLMConfig    `yaml:"llm"`
-	RAG    RAGConfig    `yaml:"rag"`
-	Embedding EmbeddingConfig `yaml:"embedding"`
+	Server      ServerConfig      `yaml:"server"`
+	Redis       RedisConfig       `yaml:"redis"`
+	MySQL       MySQLConfig       `yaml:"mysql"`
+	Elasticsearch ElasticsearchConfig `yaml:"elasticsearch"`
+	RocketMQ    RocketMQConfig    `yaml:"rocketmq"`
+	LLM         LLMConfig         `yaml:"llm"`
+	RAG         RAGConfig         `yaml:"rag"`
+	Embedding   EmbeddingConfig   `yaml:"embedding"`
+	Seckill     SeckillConfig     `yaml:"seckill"`
 }
 
 // RedisConfig Redis相关配置
@@ -46,6 +51,47 @@ type RAGConfig struct {
 type EmbeddingConfig struct {
 	Model string `yaml:"model"`
 	APIKey string `yaml:"api_key"`
+}
+
+// ServerConfig 服务器相关配置
+type ServerConfig struct {
+	Host         string        `yaml:"host"`
+	Port         int           `yaml:"port"`
+	ReadTimeout  time.Duration `yaml:"read_timeout"`
+	WriteTimeout time.Duration `yaml:"write_timeout"`
+}
+
+// MySQLConfig MySQL数据库配置
+type MySQLConfig struct {
+	DSN             string `yaml:"dsn"`
+	MaxOpenConns    int    `yaml:"max_open_conns"`
+	MaxIdleConns    int    `yaml:"max_idle_conns"`
+	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime"`
+}
+
+// ElasticsearchConfig Elasticsearch配置
+type ElasticsearchConfig struct {
+	Addresses []string `yaml:"addresses"`
+	Username  string   `yaml:"username"`
+	Password  string   `yaml:"password"`
+	Index     string   `yaml:"index"`
+}
+
+// RocketMQConfig RocketMQ配置
+type RocketMQConfig struct {
+	NameServer   string `yaml:"name_server"`
+	GroupName    string `yaml:"group_name"`
+	Topic        string `yaml:"topic"`
+	InstanceName string `yaml:"instance_name"`
+}
+
+// SeckillConfig 秒杀系统配置
+type SeckillConfig struct {
+	CachePrefix    string        `yaml:"cache_prefix"`
+	LockPrefix     string        `yaml:"lock_prefix"`
+	LockExpire     time.Duration `yaml:"lock_expire"`
+	MaxRetry       int           `yaml:"max_retry"`
+	OrderTimeout   time.Duration `yaml:"order_timeout"`
 }
 
 var (
