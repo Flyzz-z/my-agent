@@ -3,7 +3,6 @@ package seckill
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"rag-agent/config"
 )
@@ -17,10 +16,10 @@ var (
 
 // Service 秒杀服务
 type Service struct {
-	repo      Repository
-	cache     CacheRepository
+	repo       Repository
+	cache      CacheRepository
 	mqProducer MQProducer
-	cfg       *config.SeckillConfig
+	cfg        *config.SeckillConfig
 }
 
 // MQProducer 消息队列生产者接口
@@ -31,38 +30,26 @@ type MQProducer interface {
 // NewService 创建秒杀服务
 func NewService(repo Repository, cache CacheRepository, mq MQProducer, cfg *config.SeckillConfig) *Service {
 	return &Service{
-		repo:      repo,
-		cache:     cache,
+		repo:       repo,
+		cache:      cache,
 		mqProducer: mq,
-		cfg:       cfg,
+		cfg:        cfg,
 	}
 }
 
 // Seckill 秒杀接口
 func (s *Service) Seckill(ctx context.Context, req *SeckillRequest) (*SeckillResponse, error) {
-	// 1. 获取分布式锁
-	lockKey := fmt.Sprintf("%s%d", s.cfg.LockPrefix, req.CouponID)
-	locked, err := s.cache.TryLock(ctx, lockKey)
-	if err != nil || !locked {
-		return &SeckillResponse{
-			Success: false,
-			Message: "系统繁忙，请稍后重试",
-		}, ErrLockFailed
-	}
-	defer s.cache.Unlock(ctx, lockKey)
-
-	// 2. 检查Redis中的库存
+	// 1. 使用 Lua 脚本原子性扣减库存
 	stock, err := s.cache.DecrStock(ctx, req.CouponID)
 	if err != nil {
 		return &SeckillResponse{
 			Success: false,
-			Message: "库存不足",
-		}, ErrStockNotEnough
+			Message: "系统错误",
+		}, err
 	}
 
+	// 2. 检查库存是否充足（Lua 脚本返回 -1 表示库存不足）
 	if stock < 0 {
-		// 回退库存
-		s.cache.SetStock(ctx, req.CouponID, 0)
 		return &SeckillResponse{
 			Success: false,
 			Message: "库存不足",
@@ -76,18 +63,24 @@ func (s *Service) Seckill(ctx context.Context, req *SeckillRequest) (*SeckillRes
 		Status:   0, // 待支付
 	}
 
-	// 4. 发送到MQ异步处理
+	// 4. 发送到MQ
 	err = s.mqProducer.SendOrderMessage(ctx, order)
 	if err != nil {
-		log.Printf("发送订单消息失败: %v", err)
-		// 回退库存
-		s.cache.SetStock(ctx, req.CouponID, stock+1)
+		log.Printf("发送MQ失败: %v, 回滚Redis库存", err)
+
+		// 原子性回滚 Redis 库存（+1）
+		if incrErr := s.cache.IncrStock(ctx, req.CouponID, 1); incrErr != nil {
+			log.Printf("回滚库存失败: %v", incrErr)
+		}
+
+		// 返回失败
 		return &SeckillResponse{
 			Success: false,
-			Message: "系统错误",
+			Message: "秒杀失败，请重试",
 		}, err
 	}
 
+	// 5. 发送成功
 	return &SeckillResponse{
 		Success: true,
 		Message: "秒杀成功，订单处理中",

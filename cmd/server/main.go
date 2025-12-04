@@ -52,7 +52,7 @@ func main() {
 	aisearchService := aisearch.NewService(graph, ragEngine, llmClient)
 
 	// 秒杀服务 - 三大主要功能之二
-	seckillService := seckill.NewService(nil, nil, nil, &cfg.Seckill) // TODO: 实现仓库和MQ
+	seckillService := seckill.NewService(nil, nil, nil, &cfg.Seckill) 
 
 	// 初始化处理器
 	aisearchHandler := handler.NewAISearchHandler(aisearchService)
